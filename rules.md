@@ -1,19 +1,22 @@
-# Rules & Boundaries
+# Rules & Boundaries — 3D UI Upgrade
 
-## Use
-- Semantic HTML
-- Clean, modern CSS (flexbox/grid)
-- Vanilla JS or React — pick one and stay consistent
+## 🛠️ Allowed Libraries & Technologies
+- **Three.js** (WebGL 3D scene, geometries, particle systems, lighting)
+- **GSAP + ScrollTrigger** (Hardware-accelerated scroll timeline & 3D camera animations)
+- **Vanilla CSS 3D Transforms** (`perspective`, `transform-style: preserve-3d`, `rotateX/Y`, `translateZ`)
+- **Semantic HTML5 & Vanilla JavaScript** (Zero bundler/build tool changes)
 
-## Avoid
-- No heavy frameworks/libraries unless necessary
-- No placeholder/lorem ipsum text in final version — use real info provided
-- No broken links or dead buttons
+## 🚫 Avoid / Prohibited
+- No heavy 3D physics engines (e.g. Cannon.js, Ammo.js) that degrade mobile FPS
+- No complete framework rewrites (do not convert to React/Vite/Next.js — keep static HTML/CSS/JS architecture)
+- No deletion or altering of existing portfolio text, URLs, project details, or mailto links
+- No heavy high-poly 3D models that cause long initial page load times
 
-## Error handling
-- Validate any contact form inputs client-side before submission
-- Graceful fallback if images fail to load
+## ⚡ Performance & Mobile Rules
+- Must maintain smooth 60 FPS performance on desktop and mobile
+- Must include automatic FPS monitoring & responsive fallback to simplified low-poly or 2D/CSS-only mode on mobile viewports (`max-width: 768px`) or low-end GPUs
+- Must lazy-load / defer non-critical WebGL initializations
 
-## Boundaries
-- Do not deploy or push to any GitHub repo without explicit approval
-- Do not delete or overwrite existing files outside the /portfolio folder
+## 🔒 Boundaries
+- Do not deploy or push to any GitHub repo without explicit user approval
+- Do not modify files outside the `/portfolio` folder

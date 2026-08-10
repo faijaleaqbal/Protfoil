@@ -33,6 +33,9 @@
 </head>
 <body>
 
+  <!-- WebGL 3D Canvas Layer -->
+  <canvas id="webgl-canvas"></canvas>
+
   <!-- Accessibility Skip Link -->
   <a href="#main-content" class="skip-link">Skip to main content</a>
 
@@ -834,7 +837,11 @@
     </div>
   </footer>
 
-  <!-- Main Application Script -->
+  <!-- 3D & Animation Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="scripts/3d-scene.js"></script>
   <script src="scripts/main.js"></script>
 </body>
 </html>

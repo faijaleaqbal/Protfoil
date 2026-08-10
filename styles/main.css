@@ -1827,3 +1827,76 @@ button {
   opacity: 1;
   transform: translateY(0);
 }
+
+/* ==========================================================================
+   3D WebGL Canvas Layer
+   ========================================================================== */
+#webgl-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.85;
+  transition: opacity 0.5s ease;
+}
+
+/* ==========================================================================
+   3D Spatial Tilt & Holographic Card Overlays
+   ========================================================================== */
+.projects-grid,
+.skills-grid,
+.about-grid,
+.contact-wrapper,
+.hero-visual {
+  perspective: 1000px;
+}
+
+.tilt-card {
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform 0.15s cubic-bezier(0.2, 0, 0.2, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Internal 3D Layer Elevation */
+.tilt-card .project-type-badge,
+.tilt-card .project-icon-wrapper,
+.tilt-card .skill-icon-wrapper,
+.tilt-card .btn,
+.tilt-card .contact-icon,
+.tilt-card .stat-icon {
+  transform: translateZ(22px);
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0.2, 1);
+}
+
+.tilt-card .project-title,
+.tilt-card .skill-card-title,
+.tilt-card .hero-code-title {
+  transform: translateZ(14px);
+}
+
+.tilt-card .tech-tag,
+.tilt-card .skill-tag {
+  transform: translateZ(10px);
+}
+
+/* Dynamic Holographic Glare Overlay */
+.tilt-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(600px circle at var(--glare-x, 50%) var(--glare-y, 50%), rgba(255, 255, 255, 0.1), transparent 45%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.tilt-card:hover::after {
+  opacity: 1;
+}
+

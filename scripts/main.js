@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initTypingEffect();
   initSkillsFilter();
   initContactForm();
+  init3DTiltEffect();
 });
 
 /* ==========================================================================
@@ -265,5 +266,40 @@ function initContactForm() {
       formStatus.className = 'form-status error';
       formStatus.textContent = '⚠️ Please fix the highlighted errors above before submitting.';
     }
+  });
+}
+
+/* ==========================================================================
+   3D Tilt & Spatial Holographic Card Micro-Interactions
+   ========================================================================== */
+function init3DTiltEffect() {
+  // Only activate 3D tilt tracking on pointer/mouse devices
+  if (window.matchMedia('(pointer: coarse)').matches) return;
+
+  const tiltCards = document.querySelectorAll('.project-card, .skill-card, .hero-card-glass, .contact-card, .stat-card, .cert-card, .testimonial-card');
+
+  tiltCards.forEach(card => {
+    card.classList.add('tilt-card');
+
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+
+      // Max 10deg tilt for smooth subtle depth
+      const rotateX = ((y - centerY) / centerY) * -10;
+      const rotateY = ((x - centerX) / centerX) * 10;
+
+      card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateZ(8px)`;
+      card.style.setProperty('--glare-x', `${((x / rect.width) * 100).toFixed(1)}%`);
+      card.style.setProperty('--glare-y', `${((y / rect.height) * 100).toFixed(1)}%`);
+    });
+
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0px)';
+    });
   });
 }
