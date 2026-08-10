@@ -1,17 +1,17 @@
 /**
  * EmailJS Configuration Constants
  * 
- * Replace the placeholder values below with your credentials from your EmailJS Dashboard:
- * https://dashboard.emailjs.com/
+ * Credentials configured for Faijal.dev portfolio
+ * Target inbox: faijaleaqbal@gmail.com
  */
 
 const EMAILJS_CONFIG = {
   // 1. Public Key (Account -> API Keys -> Public Key)
-  PUBLIC_KEY: "YOUR_EMAILJS_PUBLIC_KEY",
+  PUBLIC_KEY: "p2UVxEuk_yVgYO1cH",
 
-  // 2. Service ID (Email Services -> Service ID e.g. service_xxxxxxx)
-  SERVICE_ID: "YOUR_EMAILJS_SERVICE_ID",
+  // 2. Service ID (Email Services -> Service ID)
+  SERVICE_ID: "service_yspxjnt",
 
-  // 3. Template ID (Email Templates -> Template ID e.g. template_xxxxxxx)
-  TEMPLATE_ID: "YOUR_EMAILJS_TEMPLATE_ID"
+  // 3. Template ID (Email Templates -> Template ID)
+  TEMPLATE_ID: "template_anlv48o"
 };
