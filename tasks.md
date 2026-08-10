@@ -37,3 +37,8 @@
 - [x] Apply continuous rotation and pointer parallax exclusively to inner `coreMesh` and `outerWireframe`
 - [x] Add `ScrollTrigger.refresh()` after DOM ready and window resize for 1-to-1 scroll tracking accuracy
 
+## Phase 7: EmailJS Non-Delivery Bugfix & Response Verification
+- [x] Map both standard (`name`, `email`, `title`, `message`) and fallback template keys (`from_name`, `from_email`, `reply_to`, `subject`, `to_email`) in `templateParams`
+- [x] Add strict `response.status === 200` verification before showing success message UI
+- [x] Add detailed `console.log('EmailJS API Success Response:', response)` for browser console inspection
+- [x] Verified live credentials via direct REST API test (`PUBLIC_KEY: p2UVxEuk_yVgYO1cH`, `SERVICE_ID: service_yspxjnt`, `TEMPLATE_ID: template_anlv48o`)

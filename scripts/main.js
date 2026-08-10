@@ -303,29 +303,44 @@ function initContactForm() {
     }
 
     try {
+      const templateParams = {
+        // Standard EmailJS default template variable names
+        name: nameInput.value.trim(),
+        email: emailInput.value.trim(),
+        title: subjectInput ? subjectInput.value.trim() || 'Portfolio Inquiry' : 'Portfolio Inquiry',
+        message: messageInput.value.trim(),
+        
+        // Custom & fallback template variable names
+        from_name: nameInput.value.trim(),
+        from_email: emailInput.value.trim(),
+        reply_to: emailInput.value.trim(),
+        subject: subjectInput ? subjectInput.value.trim() || 'Portfolio Inquiry' : 'Portfolio Inquiry',
+        to_name: 'Md Faijal Eaqbal',
+        to_email: 'faijaleaqbal@gmail.com'
+      };
+
       // Send Email via EmailJS
-      await emailjs.send(
+      const response = await emailjs.send(
         EMAILJS_CONFIG.SERVICE_ID,
         EMAILJS_CONFIG.TEMPLATE_ID,
-        {
-          from_name: nameInput.value.trim(),
-          from_email: emailInput.value.trim(),
-          reply_to: emailInput.value.trim(),
-          subject: subjectInput ? subjectInput.value.trim() || 'Portfolio Inquiry' : 'Portfolio Inquiry',
-          message: messageInput.value.trim(),
-          to_email: 'faijaleaqbal@gmail.com'
-        }
+        templateParams
       );
 
-      // Success feedback & clear form fields
-      formStatus.className = 'form-status success';
-      formStatus.textContent = '🎉 Thank you! Your message has been sent successfully to Md Faijal Eaqbal.';
-      form.reset();
+      console.log('EmailJS API Success Response:', response);
+
+      // Verify exact 200 OK status from EmailJS API
+      if (response && (response.status === 200 || response.text === 'OK')) {
+        formStatus.className = 'form-status success';
+        formStatus.textContent = '🎉 Thank you! Your message has been sent successfully to Md Faijal Eaqbal.';
+        form.reset();
+      } else {
+        throw new Error(`EmailJS returned status ${response ? response.status : 'unknown'}: ${response ? response.text : ''}`);
+      }
 
     } catch (err) {
-      console.error('EmailJS Error:', err);
+      console.error('EmailJS Submission Error:', err);
       formStatus.className = 'form-status error';
-      formStatus.textContent = '❌ Failed to send email. Please try again or email directly at faijaleaqbal@gmail.com.';
+      formStatus.textContent = `❌ Failed to send email (${err.text || err.message || 'Network Error'}). Please try again or email directly at faijaleaqbal@gmail.com.`;
     } finally {
       if (submitBtn) {
         submitBtn.disabled = false;
