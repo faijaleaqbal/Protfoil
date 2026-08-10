@@ -199,7 +199,7 @@ function initSkillsFilter() {
 }
 
 /* ==========================================================================
-   Contact Form Validation & Client-Side Submission
+   Contact Form Validation & EmailJS Client-Side Submission
    ========================================================================== */
 function initContactForm() {
   const form = document.getElementById('contact-form');
@@ -207,8 +207,10 @@ function initContactForm() {
 
   const nameInput = document.getElementById('contact-name');
   const emailInput = document.getElementById('contact-email');
+  const subjectInput = document.getElementById('contact-subject');
   const messageInput = document.getElementById('contact-message');
   const formStatus = document.getElementById('form-status');
+  const submitBtn = document.getElementById('submit-contact-btn');
 
   const nameError = document.getElementById('name-error');
   const emailError = document.getElementById('email-error');
@@ -246,25 +248,89 @@ function initContactForm() {
     });
   }
 
-  form.addEventListener('submit', (e) => {
+  // Auto-initialize EmailJS if public key is configured
+  if (typeof emailjs !== 'undefined' && typeof EMAILJS_CONFIG !== 'undefined' && EMAILJS_CONFIG.PUBLIC_KEY && EMAILJS_CONFIG.PUBLIC_KEY !== 'YOUR_EMAILJS_PUBLIC_KEY') {
+    try {
+      emailjs.init(EMAILJS_CONFIG.PUBLIC_KEY);
+    } catch (e) {
+      console.warn('EmailJS init warning:', e);
+    }
+  }
+
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const isNameValid = validateInput(nameInput, nameError, nameInput.value.trim().length >= 2);
     const isEmailValid = validateInput(emailInput, emailError, emailRegex.test(emailInput.value.trim()));
     const isMessageValid = validateInput(messageInput, messageError, messageInput.value.trim().length >= 10);
 
-    if (isNameValid && isEmailValid && isMessageValid) {
-      formStatus.className = 'form-status success';
-      formStatus.textContent = '🎉 Thank you! Your message has been sent successfully. Md Faijal will get back to you soon.';
-      form.reset();
-
-      setTimeout(() => {
-        formStatus.className = 'form-status';
-        formStatus.textContent = '';
-      }, 6000);
-    } else {
+    if (!isNameValid || !isEmailValid || !isMessageValid) {
       formStatus.className = 'form-status error';
       formStatus.textContent = '⚠️ Please fix the highlighted errors above before submitting.';
+      return;
+    }
+
+    // Button Loading State
+    const originalBtnHTML = submitBtn ? submitBtn.innerHTML : '';
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Sending...';
+    }
+
+    formStatus.className = 'form-status';
+    formStatus.textContent = '';
+
+    // If EmailJS config credentials are not set yet, fallback gracefully
+    const hasCredentials = typeof emailjs !== 'undefined' &&
+                           typeof EMAILJS_CONFIG !== 'undefined' &&
+                           EMAILJS_CONFIG.SERVICE_ID &&
+                           EMAILJS_CONFIG.SERVICE_ID !== 'YOUR_EMAILJS_SERVICE_ID' &&
+                           EMAILJS_CONFIG.TEMPLATE_ID &&
+                           EMAILJS_CONFIG.TEMPLATE_ID !== 'YOUR_EMAILJS_TEMPLATE_ID';
+
+    if (!hasCredentials) {
+      // Demo fallback while awaiting actual keys from user
+      setTimeout(() => {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnHTML;
+        }
+        formStatus.className = 'form-status success';
+        formStatus.textContent = '🎉 Thank you! Your message has been sent. (Awaiting EmailJS Keys to deliver directly to faijaleaqbal@gmail.com)';
+        form.reset();
+      }, 1000);
+      return;
+    }
+
+    try {
+      // Send Email via EmailJS
+      await emailjs.send(
+        EMAILJS_CONFIG.SERVICE_ID,
+        EMAILJS_CONFIG.TEMPLATE_ID,
+        {
+          from_name: nameInput.value.trim(),
+          from_email: emailInput.value.trim(),
+          reply_to: emailInput.value.trim(),
+          subject: subjectInput ? subjectInput.value.trim() || 'Portfolio Inquiry' : 'Portfolio Inquiry',
+          message: messageInput.value.trim(),
+          to_email: 'faijaleaqbal@gmail.com'
+        }
+      );
+
+      // Success feedback & clear form fields
+      formStatus.className = 'form-status success';
+      formStatus.textContent = '🎉 Thank you! Your message has been sent successfully to Md Faijal Eaqbal.';
+      form.reset();
+
+    } catch (err) {
+      console.error('EmailJS Error:', err);
+      formStatus.className = 'form-status error';
+      formStatus.textContent = '❌ Failed to send email. Please try again or email directly at faijaleaqbal@gmail.com.';
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnHTML;
+      }
     }
   });
 }

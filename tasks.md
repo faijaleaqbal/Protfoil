@@ -24,3 +24,10 @@
 - [x] Add automatic mobile fallback (`< 768px`) reducing WebGL workload and utilizing CSS 3D transforms
 - [x] Audit Core Web Vitals and ensure 60 FPS scrolling performance
 - [x] Create/update `memory.md` with session progress
+
+## Phase 5: EmailJS Contact Form Integration
+- [x] Create `scripts/email-config.js` with `PUBLIC_KEY`, `SERVICE_ID`, `TEMPLATE_ID` credentials object
+- [x] Add EmailJS SDK CDN (`email.min.js`) and `scripts/email-config.js` script tag to `index.html`
+- [x] Integrate `emailjs.send()` dispatch inside `initContactForm()` in `scripts/main.js`
+- [x] Implement button loading state (`Sending...`), green success message, red error message, and automatic form reset
+
