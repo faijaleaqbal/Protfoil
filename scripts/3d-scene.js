@@ -1,7 +1,7 @@
 /**
  * 3D Scene Controller for Portfolio Website
  * Handles WebGL Canvas Setup, Three.js Hero Scene, Interactive Mouse Parallax,
- * GSAP ScrollTrigger 3D Camera Transitions & Performance Safeguards.
+ * Deterministic GSAP ScrollTrigger 3D Camera/Object Timeline & Performance Safeguards.
  */
 
 (function () {
@@ -72,7 +72,7 @@
     window.addEventListener('pointermove', onPointerMove, { passive: true });
     window.addEventListener('resize', onWindowResize, { passive: true });
 
-    // Setup GSAP ScrollTrigger Camera Transitions
+    // Setup GSAP ScrollTrigger Camera & 3D Object Timeline
     setupScrollTriggers();
 
     // Start Render Loop
@@ -162,6 +162,7 @@
 
   /**
    * Setup GSAP ScrollTrigger 3D Camera & Object Animations
+   * Uses a single deterministic master timeline linked to body scroll progress (scrub: 0.8)
    */
   function setupScrollTriggers() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
@@ -174,57 +175,40 @@
     // Skip heavy scroll camera movement on mobile to preserve 60 FPS
     if (window.innerWidth <= 768) return;
 
-    // Timeline 1: Hero -> About
-    gsap.timeline({
+    // Master Scroll Timeline tied smoothly to total document scroll
+    const tl = gsap.timeline({
       scrollTrigger: {
-        trigger: '#about',
-        start: 'top bottom',
-        end: 'top center',
-        scrub: 1
+        trigger: 'body',
+        start: 'top top',
+        end: 'bottom bottom',
+        scrub: 0.8 // Direct, smooth 1-to-1 scroll tracking with slight physical inertia
       }
-    })
-    .to(heroGroup.position, { x: -3.2, y: 0.3, z: 1.5 }, 0)
-    .to(heroGroup.rotation, { z: 0.5 }, 0)
-    .to(camera.position, { z: 13 }, 0);
+    });
 
-    // Timeline 2: About -> Skills
-    gsap.timeline({
-      scrollTrigger: {
-        trigger: '#skills',
-        start: 'top bottom',
-        end: 'top center',
-        scrub: 1
-      }
-    })
-    .to(heroGroup.position, { x: 0, y: -0.8, z: 4.0 }, 0)
-    .to(heroGroup.scale, { x: 1.3, y: 1.3, z: 1.3 }, 0)
-    .to(camera.position, { z: 11 }, 0);
+    // 0% -> 25% Scroll Progress (Hero -> About Section)
+    tl.to(heroGroup.position, { x: -3.2, y: 0.3, z: 1.5, ease: 'none' }, 0)
+      .to(heroGroup.scale, { x: 1.1, y: 1.1, z: 1.1, ease: 'none' }, 0)
+      .to(camera.position, { z: 13, ease: 'none' }, 0);
 
-    // Timeline 3: Skills -> Projects
-    gsap.timeline({
-      scrollTrigger: {
-        trigger: '#projects',
-        start: 'top bottom',
-        end: 'top center',
-        scrub: 1
-      }
-    })
-    .to(heroGroup.position, { x: 3.5, y: 0.5, z: 0.5 }, 0)
-    .to(heroGroup.scale, { x: 0.95, y: 0.95, z: 0.95 }, 0)
-    .to(camera.position, { z: 14 }, 0);
+    // 25% -> 50% Scroll Progress (About -> Skills Section)
+    tl.to(heroGroup.position, { x: 0, y: -0.8, z: 3.5, ease: 'none' }, 0.25)
+      .to(heroGroup.scale, { x: 1.35, y: 1.35, z: 1.35, ease: 'none' }, 0.25)
+      .to(camera.position, { z: 11, ease: 'none' }, 0.25);
 
-    // Timeline 4: Projects -> Contact
-    gsap.timeline({
-      scrollTrigger: {
-        trigger: '#contact',
-        start: 'top bottom',
-        end: 'top center',
-        scrub: 1
-      }
-    })
-    .to(heroGroup.position, { x: 0, y: 0, z: -2.0 }, 0)
-    .to(heroGroup.scale, { x: 1.1, y: 1.1, z: 1.1 }, 0)
-    .to(camera.position, { z: 16 }, 0);
+    // 50% -> 75% Scroll Progress (Skills -> Projects Section)
+    tl.to(heroGroup.position, { x: 3.5, y: 0.5, z: 0.8, ease: 'none' }, 0.5)
+      .to(heroGroup.scale, { x: 0.95, y: 0.95, z: 0.95, ease: 'none' }, 0.5)
+      .to(camera.position, { z: 14, ease: 'none' }, 0.5);
+
+    // 75% -> 100% Scroll Progress (Projects -> Contact Section)
+    tl.to(heroGroup.position, { x: 0, y: 0, z: -2.0, ease: 'none' }, 0.75)
+      .to(heroGroup.scale, { x: 1.1, y: 1.1, z: 1.1, ease: 'none' }, 0.75)
+      .to(camera.position, { z: 16, ease: 'none' }, 0.75);
+
+    // Ensure ScrollTrigger refreshes accurately after initial page load
+    setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 250);
   }
 
   /**
@@ -250,7 +234,9 @@
     renderer.setSize(windowWidth, windowHeight);
 
     updateGroupPosition();
-    ScrollTrigger.refresh();
+    if (typeof ScrollTrigger !== 'undefined') {
+      ScrollTrigger.refresh();
+    }
   }
 
   /**
@@ -263,15 +249,17 @@
     targetRotationY += (mouseX * 0.6 - targetRotationY) * 0.04;
     targetRotationX += (mouseY * 0.6 - targetRotationX) * 0.04;
 
-    if (heroGroup) {
-      heroGroup.rotation.y += 0.005 + targetRotationY * 0.02;
-      heroGroup.rotation.x += 0.003 + targetRotationX * 0.02;
-      // Gentle floating oscillation
-      heroGroup.position.y += Math.sin(Date.now() * 0.0015) * 0.003;
+    // Apply continuous rotation & pointer parallax to inner meshes (coreMesh & outerWireframe),
+    // leaving heroGroup.position and heroGroup.scale exclusively controlled by GSAP ScrollTrigger!
+    if (coreMesh) {
+      coreMesh.rotation.y += 0.006 + targetRotationY * 0.02;
+      coreMesh.rotation.x += 0.003 + targetRotationX * 0.02;
+      // Floating oscillation applied ONLY to inner child mesh (does NOT fight GSAP heroGroup.position!)
+      coreMesh.position.y = Math.sin(Date.now() * 0.0015) * 0.15;
     }
 
     if (outerWireframe) {
-      outerWireframe.rotation.y -= 0.007;
+      outerWireframe.rotation.y -= 0.008;
       outerWireframe.rotation.z += 0.004;
     }
 

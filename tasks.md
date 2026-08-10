@@ -31,3 +31,9 @@
 - [x] Integrate `emailjs.send()` dispatch inside `initContactForm()` in `scripts/main.js`
 - [x] Implement button loading state (`Sending...`), green success message, red error message, and automatic form reset
 
+## Phase 6: 3D Sphere Scroll Sync Bugfix
+- [x] Decouple `heroGroup.position` from render loop `Math.sin()` floating mutation to eliminate GSAP timeline clashing
+- [x] Unify section scroll animations into a master GSAP timeline (`scrub: 0.8`) tied to document scroll
+- [x] Apply continuous rotation and pointer parallax exclusively to inner `coreMesh` and `outerWireframe`
+- [x] Add `ScrollTrigger.refresh()` after DOM ready and window resize for 1-to-1 scroll tracking accuracy
+
