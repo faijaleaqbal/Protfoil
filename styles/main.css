@@ -556,8 +556,8 @@ button {
 
 .about-grid {
   display: grid;
-  grid-template-columns: 0.8fr 1.2fr;
-  gap: 3rem;
+  grid-template-columns: minmax(280px, 320px) 1fr;
+  gap: 2.5rem;
   align-items: start;
 }
 
@@ -568,12 +568,17 @@ button {
   padding: 2rem;
   text-align: center;
   box-shadow: var(--shadow-md);
+  width: 100%;
+  max-width: 340px;
+  margin: 0 auto;
+  position: relative;
 }
 
 .profile-image-container {
   position: relative;
-  width: 150px;
-  height: 150px;
+  width: 160px;
+  height: 160px;
+  max-width: 100%;
   margin: 0 auto 1.5rem auto;
 }
 
@@ -584,6 +589,7 @@ button {
   object-fit: cover;
   border: 3px solid var(--accent-primary);
   box-shadow: var(--shadow-glow);
+  display: block;
 }
 
 .profile-avatar-placeholder {
@@ -601,8 +607,8 @@ button {
 
 .profile-badge {
   position: absolute;
-  bottom: 0;
-  right: -10px;
+  bottom: 4px;
+  right: -5px;
   background: var(--bg-surface);
   border: 1px solid var(--border-hover);
   padding: 0.35rem 0.85rem;
@@ -611,6 +617,8 @@ button {
   font-weight: 700;
   color: var(--accent-cyan);
   box-shadow: var(--shadow-sm);
+  white-space: nowrap;
+  z-index: 2;
 }
 
 .profile-info h3 {
@@ -1882,9 +1890,16 @@ button {
 }
 
 @media (max-width: 992px) {
+  .about-grid,
   .contact-grid,
   .footer-container {
     grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .about-profile-card {
+    max-width: 360px;
+    width: 100%;
   }
 }
 
