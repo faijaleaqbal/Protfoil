@@ -778,13 +778,181 @@ button {
   line-height: 1.6;
 }
 
-/* Media Query Responsive Adjustments for Phase 2 */
-@media (max-width: 992px) {
-  .hero-container,
-  .about-grid {
-    grid-template-columns: 1fr;
-  }
+/* ==========================================================================
+   Services Section (NEW)
+   ========================================================================== */
+.services-section {
+  position: relative;
 }
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+  margin-bottom: 4rem;
+}
+
+.service-card {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  transition: all var(--transition-normal);
+}
+
+.service-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
+}
+
+.service-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  background: var(--gradient-primary);
+  color: #ffffff;
+}
+
+.service-icon.bot { background: linear-gradient(135deg, #24a1de 0%, #5865f2 100%); }
+.service-icon.web { background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%); }
+.service-icon.automation { background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); }
+
+.service-card h3 {
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.service-price {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.service-price span {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--accent-primary);
+}
+
+.service-features {
+  list-style: none;
+  margin-bottom: 1.5rem;
+  flex-grow: 1;
+}
+
+.service-features li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.service-features li i {
+  color: var(--accent-emerald);
+  font-size: 0.85rem;
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+}
+
+.service-tiers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.tier {
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-full);
+  background: rgba(99, 102, 241, 0.12);
+  color: var(--accent-primary);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+}
+
+.tier.starter { background: rgba(16, 185, 129, 0.12); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.25); }
+.tier.standard { background: rgba(99, 102, 241, 0.12); color: var(--accent-primary); border-color: rgba(99, 102, 241, 0.25); }
+.tier.single { background: rgba(245, 158, 11, 0.12); color: #f59e0b; border-color: rgba(245, 158, 11, 0.25); }
+
+.service-cta {
+  width: 100%;
+  justify-content: center;
+}
+
+/* Process Section */
+.process-section {
+  text-align: center;
+}
+
+.process-section h3 {
+  font-family: var(--font-heading);
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 2.5rem;
+}
+
+.process-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.process-step {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  text-align: left;
+  transition: all var(--transition-normal);
+}
+
+.process-step:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-4px);
+}
+
+.step-number {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: var(--gradient-primary);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+}
+
+.process-step h4 {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.process-step p {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
 /* ==========================================================================
    Skills Section & Categorized Matrix
    ========================================================================== */
@@ -881,9 +1049,12 @@ button {
 .skill-icon-wrapper.node { color: #6cc24a; }
 .skill-icon-wrapper.bots { color: #24a1de; }
 .skill-icon-wrapper.react { color: #61dafb; }
+.skill-icon-wrapper.fastapi { color: #009688; }
 .skill-icon-wrapper.git { color: #f05032; }
 .skill-icon-wrapper.linux { color: #fcc624; }
 .skill-icon-wrapper.db { color: #336791; }
+.skill-icon-wrapper.docker { color: #2496ed; }
+.skill-icon-wrapper.opencode { color: #a855f7; }
 
 .skill-meta {
   flex-grow: 1;
@@ -1337,6 +1508,7 @@ button {
     padding: 2.5rem 1.5rem;
   }
 }
+
 /* ==========================================================================
    Contact Section & Interactive Form
    ========================================================================== */
@@ -1394,6 +1566,32 @@ button {
 .contact-icon.location {
   background: rgba(16, 185, 129, 0.12);
   color: var(--accent-emerald);
+}
+
+.contact-icon.calendar {
+  background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+  color: #ffffff;
+}
+
+.calendly-card {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.calendly-card .contact-icon {
+  flex-shrink: 0;
+}
+
+.calendly-card .contact-card-content {
+  width: 100%;
+}
+
+.calendly-inline-widget {
+  width: 100%;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
 }
 
 .contact-card-content h4 {
@@ -1899,4 +2097,3 @@ button {
 .tilt-card:hover::after {
   opacity: 1;
 }
-
