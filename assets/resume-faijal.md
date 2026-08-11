@@ -1,7 +1,7 @@
 # Md Faijal Eaqbal
 **Self-Taught Full-Stack Developer & Automation Engineer | AI-Accelerated Workflow (OpenCode)**  
 📍 Malda, West Bengal, India | 📞 +91-9002215974 | ✉️ faijaleaqbal@gmail.com  
-🌐 [faijaleaqbal.duckdns.org](https://faijaleaqbal.duckdns.org) | 🐙 [github.com/faijaleaqbal](https://github.com/faijaleaqbal) | 💼 [linkedin.com/in/faijaleaqbal](https://linkedin.com/in/faijaleaqbal)
+🌐 [faijaleaqbal.duckdns.org](https://faijaleaqbal.duckdns.org) | 🐙 [github.com/faijaleaqbal](https://github.com/faijaleaqbal) | 💼 [LinkedIn](https://www.linkedin.com/in/md-faijal-eaqbal-a6bb1a380) | 💬 Telegram: [@xynqr](https://t.me/xynqr)
 
 ---
 
