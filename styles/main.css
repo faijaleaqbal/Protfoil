@@ -350,10 +350,11 @@ button {
    Hero Section Styling
    ========================================================================== */
 .hero-section {
-  padding-top: calc(var(--nav-height) + 3rem);
-  padding-bottom: 5rem;
+  padding-top: calc(var(--nav-height) + 1.5rem);
+  padding-bottom: 2.5rem;
   position: relative;
   overflow: hidden;
+  min-height: auto;
 }
 
 .hero-container {
@@ -696,16 +697,16 @@ button {
 
 .bio-photo-wrapper {
   position: relative;
-  width: 100%;
-  max-width: 320px;
+  width: 180px;
+  height: 180px;
+  max-width: 180px;
   flex-shrink: 0;
+  margin: 0 auto;
 }
 
 .bio-profile-img {
-  width: 100%;
-  max-width: 320px;
-  height: auto;
-  aspect-ratio: 1 / 1;
+  width: 180px;
+  height: 180px;
   border-radius: 12px;
   object-fit: cover;
   border: 3px solid var(--accent-primary);
@@ -715,13 +716,13 @@ button {
 
 .bio-photo-wrapper .profile-badge {
   position: absolute;
-  bottom: 10px;
-  right: 10px;
+  bottom: 8px;
+  right: 8px;
   background: var(--bg-surface);
   border: 1px solid var(--border-hover);
-  padding: 0.35rem 0.85rem;
+  padding: 0.25rem 0.65rem;
   border-radius: var(--radius-full);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 700;
   color: var(--accent-cyan);
   box-shadow: var(--shadow-md);
@@ -737,12 +738,15 @@ button {
   }
 
   .bio-text {
-    flex: 1 1 58%;
+    flex: 1;
   }
 
   .bio-photo-wrapper {
-    flex: 0 0 240px;
-    max-width: 280px;
+    width: 180px;
+    height: 180px;
+    max-width: 180px;
+    flex: 0 0 180px;
+    margin: 0;
   }
 }
 
@@ -1955,6 +1959,31 @@ button {
 }
 
 @media (max-width: 992px) {
+  .hero-container {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    text-align: center;
+  }
+
+  .hero-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .hero-description {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .hero-cta-group {
+    justify-content: center;
+  }
+
+  .hero-socials {
+    justify-content: center;
+  }
+
   .about-grid,
   .contact-grid,
   .footer-container {
@@ -1970,6 +1999,15 @@ button {
 
 /* Media Queries for Responsive Design */
 @media (max-width: 768px) {
+  .hero-section {
+    padding-top: calc(var(--nav-height) + 1rem);
+    padding-bottom: 2rem;
+  }
+
+  .hero-container {
+    gap: 1.25rem;
+  }
+
   .hamburger {
     display: flex;
   }
@@ -2029,7 +2067,8 @@ button {
   }
 
   .hero-card-glass {
-    max-width: 100%;
+    max-width: 280px;
+    margin: 0 auto;
   }
 
   .code-body {
