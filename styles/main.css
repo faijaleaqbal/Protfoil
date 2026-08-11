@@ -665,20 +665,85 @@ button {
 .about-bio-box h3 {
   font-family: var(--font-heading);
   font-size: 1.3rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
   display: flex;
   align-items: center;
   gap: 0.6rem;
 }
 
-.about-bio-box p {
+/* Bio Flex Container - Side-by-Side Photo & Text Layout */
+.bio-flex-container {
+  display: flex;
+  flex-direction: column-reverse; /* Mobile default: photo on top, text below */
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.bio-text {
+  flex: 1;
+  width: 100%;
+}
+
+.bio-text p {
   color: var(--text-secondary);
   line-height: 1.7;
   margin-bottom: 1rem;
 }
 
-.about-bio-box p:last-child {
+.bio-text p:last-child {
   margin-bottom: 0;
+}
+
+.bio-photo-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  flex-shrink: 0;
+}
+
+.bio-profile-img {
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 3px solid var(--accent-primary);
+  box-shadow: var(--shadow-glow);
+  display: block;
+}
+
+.bio-photo-wrapper .profile-badge {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-hover);
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent-cyan);
+  box-shadow: var(--shadow-md);
+  white-space: nowrap;
+  z-index: 2;
+}
+
+@media (min-width: 769px) {
+  .bio-flex-container {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 2rem;
+  }
+
+  .bio-text {
+    flex: 1 1 58%;
+  }
+
+  .bio-photo-wrapper {
+    flex: 0 0 240px;
+    max-width: 280px;
+  }
 }
 
 /* Education Timeline */
