@@ -135,11 +135,13 @@ button {
 
 .logo {
   font-family: var(--font-heading);
-  font-size: 1.5rem;
+  font-size: 1.45rem;
   font-weight: 700;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  margin-right: 1.75rem;
+  flex-shrink: 0;
 }
 
 .logo-text {
@@ -173,12 +175,13 @@ button {
 }
 
 .nav-link {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 500;
   color: var(--text-secondary);
   transition: color var(--transition-fast);
   position: relative;
   padding: 0.5rem 0;
+  white-space: nowrap;
 }
 
 .nav-link:hover,
@@ -207,6 +210,8 @@ button {
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex-shrink: 0;
+  margin-left: 1rem;
 }
 
 /* Theme Toggle Button */
@@ -1956,6 +1961,26 @@ button {
   color: var(--text-muted);
   flex-wrap: wrap;
   gap: 1rem;
+}
+
+@media (max-width: 1180px) and (min-width: 769px) {
+  .logo {
+    margin-right: 1rem;
+    font-size: 1.35rem;
+  }
+
+  .nav-menu {
+    gap: 0.85rem;
+  }
+
+  .nav-link {
+    font-size: 0.84rem;
+  }
+
+  .nav-actions {
+    margin-left: 0.5rem;
+    gap: 0.5rem;
+  }
 }
 
 @media (max-width: 992px) {
