@@ -1964,6 +1964,15 @@ button {
 
 /* Media Queries for Responsive Design */
 @media (max-width: 768px) {
+  .logo {
+    margin-right: 0.5rem;
+    padding-right: 0;
+  }
+
+  .nav-container nav {
+    margin-left: 0;
+  }
+
   .hero-section {
     padding-top: calc(var(--nav-height) + 1rem);
     padding-bottom: 2rem;
@@ -1974,7 +1983,7 @@ button {
   }
 
   .hamburger {
-    display: flex;
+    display: flex !important;
   }
 
   .nav-menu {
@@ -1989,10 +1998,13 @@ button {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 2.5rem;
+    gap: 2rem;
+    padding: 2rem 1rem;
     transition: right var(--transition-normal);
     box-shadow: var(--shadow-lg);
     overflow-y: auto;
+    z-index: 1000;
+    margin-left: 0;
   }
 
   .nav-menu.open {
