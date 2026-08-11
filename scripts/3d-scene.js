@@ -1,7 +1,7 @@
 /**
  * 3D Scene Controller for Portfolio Website
  * Handles WebGL Canvas Setup, Three.js Hero Scene, Interactive Mouse Parallax,
- * Deterministic GSAP ScrollTrigger 3D Camera/Object Timeline & Performance Safeguards.
+ * Deterministic GSAP ScrollTrigger 3D Camera/Object Timeline, IntersectionObserver Pausing & Performance Safeguards.
  */
 
 (function () {
@@ -13,13 +13,17 @@
     return;
   }
 
-  let canvas, renderer, scene, camera;
+  let canvas, renderer, scene, camera, clock;
   let heroGroup, coreMesh, outerWireframe, particleSystem;
   let mouseX = 0, mouseY = 0;
   let targetRotationX = 0, targetRotationY = 0;
   let windowWidth = window.innerWidth;
   let windowHeight = window.innerHeight;
   let isMobile = windowWidth <= 768;
+  const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+  
+  let isCanvasVisible = true;
+  let animFrameId = null;
   let frameCount = 0;
   let lastTime = performance.now();
   let fps = 60;
@@ -32,14 +36,18 @@
       document.body.insertBefore(canvas, document.body.firstChild);
     }
 
-    // Renderer setup
+    clock = new THREE.Clock();
+
+    // Renderer setup with mobile-optimized resolution limit
     renderer = new THREE.WebGLRenderer({
       canvas: canvas,
       alpha: true,
-      antialias: !isMobile, // antialias on desktop, disabled on mobile for max FPS
+      antialias: !isMobile, // Disable anti-aliasing on mobile for high performance
       powerPreference: 'high-performance'
     });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
+
+    // Mobile pixel ratio capped to 1.0x to eliminate GPU fill-rate lag
+    renderer.setPixelRatio(isMobile ? 1.0 : Math.min(window.devicePixelRatio, 1.5));
     renderer.setSize(windowWidth, windowHeight);
 
     // Scene setup
@@ -68,12 +76,17 @@
     buildHeroTechCore();
     buildParticleField();
 
-    // Mouse Pointer Listener
-    window.addEventListener('pointermove', onPointerMove, { passive: true });
+    // Attach pointer listeners ONLY on desktop/non-touch devices to avoid scroll jitter
+    if (!isTouchDevice && !isMobile) {
+      window.addEventListener('pointermove', onPointerMove, { passive: true });
+    }
     window.addEventListener('resize', onWindowResize, { passive: true });
 
     // Setup GSAP ScrollTrigger Camera & 3D Object Timeline
     setupScrollTriggers();
+
+    // IntersectionObserver to pause rendering when hero section is out of view
+    setupVisibilityObserver();
 
     // Start Render Loop
     animate();
@@ -97,8 +110,8 @@
     coreMesh = new THREE.Mesh(innerGeometry, innerMaterial);
     heroGroup.add(coreMesh);
 
-    // Outer Tech Wireframe Shell
-    const outerGeometry = new THREE.IcosahedronGeometry(isMobile ? 2.4 : 3.2, 2);
+    // Outer Tech Wireframe Shell (subdivision detail 1 on mobile, 2 on desktop)
+    const outerGeometry = new THREE.IcosahedronGeometry(isMobile ? 2.2 : 3.2, isMobile ? 1 : 2);
     const outerMaterial = new THREE.MeshBasicMaterial({
       color: 0x06b6d4,
       wireframe: true,
@@ -124,7 +137,7 @@
    * Build Responsive WebGL Particle Starfield / Cloud
    */
   function buildParticleField() {
-    const particleCount = isMobile ? 350 : 1200;
+    const particleCount = isMobile ? 120 : 800;
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(particleCount * 3);
     const colors = new Float32Array(particleCount * 3);
@@ -162,11 +175,9 @@
 
   /**
    * Setup GSAP ScrollTrigger 3D Camera & Object Animations
-   * Uses a single deterministic master timeline linked to body scroll progress (scrub: 0.8)
    */
   function setupScrollTriggers() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
-      console.warn('GSAP or ScrollTrigger not loaded. Scroll-based 3D animation disabled.');
       return;
     }
 
@@ -181,34 +192,49 @@
         trigger: 'body',
         start: 'top top',
         end: 'bottom bottom',
-        scrub: 0.8 // Direct, smooth 1-to-1 scroll tracking with slight physical inertia
+        scrub: 0.8
       }
     });
 
-    // 0% -> 25% Scroll Progress (Hero -> About Section)
     tl.to(heroGroup.position, { x: -3.2, y: 0.3, z: 1.5, ease: 'none' }, 0)
       .to(heroGroup.scale, { x: 1.1, y: 1.1, z: 1.1, ease: 'none' }, 0)
       .to(camera.position, { z: 13, ease: 'none' }, 0);
 
-    // 25% -> 50% Scroll Progress (About -> Skills Section)
     tl.to(heroGroup.position, { x: 0, y: -0.8, z: 3.5, ease: 'none' }, 0.25)
       .to(heroGroup.scale, { x: 1.35, y: 1.35, z: 1.35, ease: 'none' }, 0.25)
       .to(camera.position, { z: 11, ease: 'none' }, 0.25);
 
-    // 50% -> 75% Scroll Progress (Skills -> Projects Section)
     tl.to(heroGroup.position, { x: 3.5, y: 0.5, z: 0.8, ease: 'none' }, 0.5)
       .to(heroGroup.scale, { x: 0.95, y: 0.95, z: 0.95, ease: 'none' }, 0.5)
       .to(camera.position, { z: 14, ease: 'none' }, 0.5);
 
-    // 75% -> 100% Scroll Progress (Projects -> Contact Section)
     tl.to(heroGroup.position, { x: 0, y: 0, z: -2.0, ease: 'none' }, 0.75)
       .to(heroGroup.scale, { x: 1.1, y: 1.1, z: 1.1, ease: 'none' }, 0.75)
       .to(camera.position, { z: 16, ease: 'none' }, 0.75);
 
-    // Ensure ScrollTrigger refreshes accurately after initial page load
     setTimeout(() => {
       ScrollTrigger.refresh();
     }, 250);
+  }
+
+  /**
+   * Setup IntersectionObserver to pause rendering when hero section is off-screen
+   */
+  function setupVisibilityObserver() {
+    if (typeof IntersectionObserver === 'undefined') return;
+    const heroSection = document.getElementById('hero');
+    if (!heroSection) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        isCanvasVisible = entry.isIntersecting;
+        if (isCanvasVisible && !animFrameId) {
+          animate();
+        }
+      });
+    }, { threshold: 0.05 });
+
+    observer.observe(heroSection);
   }
 
   /**
@@ -230,7 +256,7 @@
     camera.aspect = windowWidth / windowHeight;
     camera.updateProjectionMatrix();
 
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
+    renderer.setPixelRatio(isMobile ? 1.0 : Math.min(window.devicePixelRatio, 1.5));
     renderer.setSize(windowWidth, windowHeight);
 
     updateGroupPosition();
@@ -240,32 +266,39 @@
   }
 
   /**
-   * Animation & Render Loop (60 FPS Target)
+   * Animation & Render Loop (60 FPS Target, Pauses when Off-Screen)
    */
   function animate() {
-    requestAnimationFrame(animate);
+    if (!isCanvasVisible) {
+      animFrameId = null;
+      return;
+    }
 
-    // Smooth rotation lerp for mouse interaction
-    targetRotationY += (mouseX * 0.6 - targetRotationY) * 0.04;
-    targetRotationX += (mouseY * 0.6 - targetRotationX) * 0.04;
+    animFrameId = requestAnimationFrame(animate);
 
-    // Apply continuous rotation & pointer parallax to inner meshes (coreMesh & outerWireframe),
-    // leaving heroGroup.position and heroGroup.scale exclusively controlled by GSAP ScrollTrigger!
+    const elapsedTime = clock.getElapsedTime();
+
+    // Smooth rotation lerp for mouse interaction on desktop
+    if (!isTouchDevice && !isMobile) {
+      targetRotationY += (mouseX * 0.6 - targetRotationY) * 0.04;
+      targetRotationX += (mouseY * 0.6 - targetRotationX) * 0.04;
+    }
+
     if (coreMesh) {
-      coreMesh.rotation.y += 0.006 + targetRotationY * 0.02;
+      coreMesh.rotation.y += 0.005 + targetRotationY * 0.02;
       coreMesh.rotation.x += 0.003 + targetRotationX * 0.02;
-      // Floating oscillation applied ONLY to inner child mesh (does NOT fight GSAP heroGroup.position!)
-      coreMesh.position.y = Math.sin(Date.now() * 0.0015) * 0.15;
+      // Smooth sinusoidal oscillation using Three.js Clock (eliminates Date.now jitter)
+      coreMesh.position.y = Math.sin(elapsedTime * 1.5) * 0.12;
     }
 
     if (outerWireframe) {
-      outerWireframe.rotation.y -= 0.008;
-      outerWireframe.rotation.z += 0.004;
+      outerWireframe.rotation.y -= 0.006;
+      outerWireframe.rotation.z += 0.003;
     }
 
     if (particleSystem) {
-      particleSystem.rotation.y += 0.0008;
-      particleSystem.rotation.x -= 0.0004;
+      particleSystem.rotation.y += 0.0006;
+      particleSystem.rotation.x -= 0.0003;
     }
 
     renderer.render(scene, camera);
@@ -278,7 +311,6 @@
       frameCount = 0;
       lastTime = now;
 
-      // Dynamic quality throttling if FPS drops below 30 on weak devices
       if (fps < 30 && renderer.getPixelRatio() > 1) {
         renderer.setPixelRatio(1);
       }
