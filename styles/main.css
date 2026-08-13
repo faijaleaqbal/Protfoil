@@ -72,14 +72,14 @@
 html {
   scroll-behavior: smooth;
   font-size: 16px;
+  background-color: var(--bg-primary);
 }
 
 body {
   font-family: var(--font-primary);
-  background-color: var(--bg-primary);
+  background-color: transparent;
   color: var(--text-primary);
   line-height: 1.6;
-  overflow-x: hidden;
   transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
@@ -375,6 +375,8 @@ button {
   grid-template-columns: 1.2fr 0.8fr;
   gap: 3rem;
   align-items: center;
+  position: relative;
+  z-index: 1;
 }
 
 .hero-badge {
@@ -563,7 +565,7 @@ button {
    About Section & Education Timeline
    ========================================================================== */
 .about-section {
-  background-color: var(--bg-secondary);
+  background-color: color-mix(in srgb, var(--bg-secondary) 90%, transparent);
   border-top: 1px solid var(--border-color);
   border-bottom: 1px solid var(--border-color);
 }
@@ -1131,7 +1133,7 @@ button {
    Projects Section Styling
    ========================================================================== */
 .projects-section {
-  background-color: var(--bg-secondary);
+  background-color: color-mix(in srgb, var(--bg-secondary) 90%, transparent);
   border-top: 1px solid var(--border-color);
   border-bottom: 1px solid var(--border-color);
 }
@@ -1407,7 +1409,7 @@ button {
    Testimonials Section
    ========================================================================== */
 .testimonials-section {
-  background-color: var(--bg-secondary);
+  background-color: color-mix(in srgb, var(--bg-secondary) 90%, transparent);
   border-top: 1px solid var(--border-color);
   border-bottom: 1px solid var(--border-color);
 }
@@ -1836,7 +1838,7 @@ button {
    Footer Styling
    ========================================================================== */
 .footer {
-  background-color: var(--bg-secondary);
+  background-color: color-mix(in srgb, var(--bg-secondary) 90%, transparent);
   border-top: 1px solid var(--border-color);
   padding-top: 4rem;
 }
@@ -1890,7 +1892,7 @@ button {
 .footer-bottom {
   border-top: 1px solid var(--border-color);
   padding: 1.5rem 0;
-  background-color: var(--bg-primary);
+  background-color: color-mix(in srgb, var(--bg-primary) 90%, transparent);
 }
 
 .footer-bottom-container {
@@ -2143,6 +2145,9 @@ button {
   pointer-events: none;
   z-index: -1;
   opacity: 0.85;
+  display: block;
+  contain: paint;
+  transform: translateZ(0);
   transition: opacity 0.5s ease;
 }
 

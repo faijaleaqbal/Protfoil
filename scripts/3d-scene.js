@@ -1,7 +1,7 @@
 /**
  * 3D Scene Controller for Portfolio Website
  * Handles WebGL Canvas Setup, Three.js Hero Scene, Interactive Mouse Parallax,
- * Deterministic GSAP ScrollTrigger 3D Camera/Object Timeline, IntersectionObserver Pausing & Performance Safeguards.
+ * IntersectionObserver Pausing & Performance Safeguards.
  */
 
 (function () {
@@ -20,19 +20,22 @@
   let windowWidth = window.innerWidth;
   let windowHeight = window.innerHeight;
   let isMobile = windowWidth <= 768;
-  const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-  
-  let isCanvasVisible = true;
+  const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+
+  let isCanvasVisible = !document.hidden;
   let animFrameId = null;
-  let frameCount = 0;
-  let lastTime = performance.now();
-  let fps = 60;
+  let lastRenderTime = 0;
+  const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function init() {
     canvas = document.getElementById('webgl-canvas');
+
     if (!canvas) {
       canvas = document.createElement('canvas');
       canvas.id = 'webgl-canvas';
+      document.body.insertBefore(canvas, document.body.firstChild);
+    } else if (canvas.parentElement !== document.body) {
+      // The background must not be clipped or unmounted with the hero.
       document.body.insertBefore(canvas, document.body.firstChild);
     }
 
@@ -46,8 +49,9 @@
       powerPreference: 'high-performance'
     });
 
-    // Mobile pixel ratio capped to 1.0x to eliminate GPU fill-rate lag
-    renderer.setPixelRatio(isMobile ? 1.0 : Math.min(window.devicePixelRatio, 1.5));
+    // Mobile pixel ratio capped to 1.0x to eliminate GPU fill-rate lag, max 1.5x on desktop
+    const pixelRatio = isMobile ? 1.0 : Math.min(window.devicePixelRatio || 1, 1.5);
+    renderer.setPixelRatio(pixelRatio);
     renderer.setSize(windowWidth, windowHeight);
 
     // Scene setup
@@ -76,17 +80,14 @@
     buildHeroTechCore();
     buildParticleField();
 
-    // Attach pointer listeners ONLY on desktop/non-touch devices to avoid scroll jitter
+    // Attach pointer listeners ONLY on desktop/non-touch devices to avoid scroll jitter & touch conflict
     if (!isTouchDevice && !isMobile) {
       window.addEventListener('pointermove', onPointerMove, { passive: true });
     }
     window.addEventListener('resize', onWindowResize, { passive: true });
 
-    // Setup GSAP ScrollTrigger Camera & 3D Object Timeline
-    setupScrollTriggers();
-
-    // IntersectionObserver to pause rendering when hero section is out of view
-    setupVisibilityObserver();
+    // Keep the background alive while scrolling; only pause in a hidden tab.
+    document.addEventListener('visibilitychange', onVisibilityChange);
 
     // Start Render Loop
     animate();
@@ -96,8 +97,8 @@
    * Build 3D Hero Tech Core Object (Inner Glowing Core + Outer Wireframe Geometry)
    */
   function buildHeroTechCore() {
-    // Inner Solid Core
-    const innerGeometry = new THREE.IcosahedronGeometry(isMobile ? 1.6 : 2.2, 1);
+    // Inner Solid Core (detail level 0 on mobile, 1 on desktop)
+    const innerGeometry = new THREE.IcosahedronGeometry(isMobile ? 1.6 : 2.2, isMobile ? 0 : 1);
     const innerMaterial = new THREE.MeshPhongMaterial({
       color: 0x6366f1,
       emissive: 0x1e1b4b,
@@ -110,8 +111,8 @@
     coreMesh = new THREE.Mesh(innerGeometry, innerMaterial);
     heroGroup.add(coreMesh);
 
-    // Outer Tech Wireframe Shell (subdivision detail 1 on mobile, 2 on desktop)
-    const outerGeometry = new THREE.IcosahedronGeometry(isMobile ? 2.2 : 3.2, isMobile ? 1 : 2);
+    // Outer Tech Wireframe Shell (subdivision detail 0 on mobile [lowest level], 1 on desktop)
+    const outerGeometry = new THREE.IcosahedronGeometry(isMobile ? 2.2 : 3.2, isMobile ? 0 : 1);
     const outerMaterial = new THREE.MeshBasicMaterial({
       color: 0x06b6d4,
       wireframe: true,
@@ -135,6 +136,7 @@
 
   /**
    * Build Responsive WebGL Particle Starfield / Cloud
+   * Low particle count on mobile (120 particles < 150 limit)
    */
   function buildParticleField() {
     const particleCount = isMobile ? 120 : 800;
@@ -173,72 +175,19 @@
     scene.add(particleSystem);
   }
 
-  /**
-   * Setup GSAP ScrollTrigger 3D Camera & Object Animations
-   */
-  function setupScrollTriggers() {
-    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
-      return;
+  function onVisibilityChange() {
+    isCanvasVisible = !document.hidden;
+    if (!isCanvasVisible && animFrameId) {
+      cancelAnimationFrame(animFrameId);
+      animFrameId = null;
+    } else if (isCanvasVisible && !animFrameId) {
+      clock.start();
+      animate();
     }
-
-    gsap.registerPlugin(ScrollTrigger);
-
-    // Skip heavy scroll camera movement on mobile to preserve 60 FPS
-    if (window.innerWidth <= 768) return;
-
-    // Master Scroll Timeline tied smoothly to total document scroll
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: 'body',
-        start: 'top top',
-        end: 'bottom bottom',
-        scrub: 0.8
-      }
-    });
-
-    tl.to(heroGroup.position, { x: -3.2, y: 0.3, z: 1.5, ease: 'none' }, 0)
-      .to(heroGroup.scale, { x: 1.1, y: 1.1, z: 1.1, ease: 'none' }, 0)
-      .to(camera.position, { z: 13, ease: 'none' }, 0);
-
-    tl.to(heroGroup.position, { x: 0, y: -0.8, z: 3.5, ease: 'none' }, 0.25)
-      .to(heroGroup.scale, { x: 1.35, y: 1.35, z: 1.35, ease: 'none' }, 0.25)
-      .to(camera.position, { z: 11, ease: 'none' }, 0.25);
-
-    tl.to(heroGroup.position, { x: 3.5, y: 0.5, z: 0.8, ease: 'none' }, 0.5)
-      .to(heroGroup.scale, { x: 0.95, y: 0.95, z: 0.95, ease: 'none' }, 0.5)
-      .to(camera.position, { z: 14, ease: 'none' }, 0.5);
-
-    tl.to(heroGroup.position, { x: 0, y: 0, z: -2.0, ease: 'none' }, 0.75)
-      .to(heroGroup.scale, { x: 1.1, y: 1.1, z: 1.1, ease: 'none' }, 0.75)
-      .to(camera.position, { z: 16, ease: 'none' }, 0.75);
-
-    setTimeout(() => {
-      ScrollTrigger.refresh();
-    }, 250);
   }
 
   /**
-   * Setup IntersectionObserver to pause rendering when hero section is off-screen
-   */
-  function setupVisibilityObserver() {
-    if (typeof IntersectionObserver === 'undefined') return;
-    const heroSection = document.getElementById('hero');
-    if (!heroSection) return;
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        isCanvasVisible = entry.isIntersecting;
-        if (isCanvasVisible && !animFrameId) {
-          animate();
-        }
-      });
-    }, { threshold: 0.05 });
-
-    observer.observe(heroSection);
-  }
-
-  /**
-   * Pointer Move Event Listener
+   * Pointer Move Event Listener (Desktop Only)
    */
   function onPointerMove(e) {
     mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
@@ -246,7 +195,7 @@
   }
 
   /**
-   * Window Resize Event Listener
+   * Window Resize Event Listener (Caches dimensions, no per-frame DOM reads)
    */
   function onWindowResize() {
     windowWidth = window.innerWidth;
@@ -256,65 +205,68 @@
     camera.aspect = windowWidth / windowHeight;
     camera.updateProjectionMatrix();
 
-    renderer.setPixelRatio(isMobile ? 1.0 : Math.min(window.devicePixelRatio, 1.5));
+    const pixelRatio = isMobile ? 1.0 : Math.min(window.devicePixelRatio || 1, 1.5);
+    renderer.setPixelRatio(pixelRatio);
     renderer.setSize(windowWidth, windowHeight);
 
     updateGroupPosition();
-    if (typeof ScrollTrigger !== 'undefined') {
-      ScrollTrigger.refresh();
-    }
   }
 
   /**
-   * Animation & Render Loop (60 FPS Target, Pauses when Off-Screen)
+   * Animation & Render Loop (Frame-rate independent via THREE.Clock getElapsedTime)
+   * Zero heavy per-frame DOM reads (like getBoundingClientRect) inside loop.
    */
-  function animate() {
+  function animate(timestamp) {
     if (!isCanvasVisible) {
+      if (animFrameId) {
+        cancelAnimationFrame(animFrameId);
+        animFrameId = null;
+      }
+      return;
+    }
+
+    if (reducedMotion) {
+      renderer.render(scene, camera);
       animFrameId = null;
       return;
     }
 
     animFrameId = requestAnimationFrame(animate);
 
+    // Limit mobile redraws to 30 FPS while the persistent background is visible.
+    if (isMobile && timestamp - lastRenderTime < 1000 / 30) return;
+    lastRenderTime = timestamp;
+
+    // Frame-rate independent timing via Three.js Clock
     const elapsedTime = clock.getElapsedTime();
 
-    // Smooth rotation lerp for mouse interaction on desktop
+    // Smooth rotation lerp for mouse interaction on desktop only
     if (!isTouchDevice && !isMobile) {
       targetRotationY += (mouseX * 0.6 - targetRotationY) * 0.04;
       targetRotationX += (mouseY * 0.6 - targetRotationX) * 0.04;
+    } else {
+      targetRotationX = 0;
+      targetRotationY = 0;
     }
 
     if (coreMesh) {
-      coreMesh.rotation.y += 0.005 + targetRotationY * 0.02;
-      coreMesh.rotation.x += 0.003 + targetRotationX * 0.02;
-      // Smooth sinusoidal oscillation using Three.js Clock (eliminates Date.now jitter)
+      coreMesh.rotation.y = elapsedTime * 0.25 + targetRotationY;
+      coreMesh.rotation.x = elapsedTime * 0.15 + targetRotationX;
+      // Smooth sinusoidal float using THREE.Clock getElapsedTime
       coreMesh.position.y = Math.sin(elapsedTime * 1.5) * 0.12;
     }
 
     if (outerWireframe) {
-      outerWireframe.rotation.y -= 0.006;
-      outerWireframe.rotation.z += 0.003;
+      outerWireframe.rotation.y = -elapsedTime * 0.2;
+      outerWireframe.rotation.z = elapsedTime * 0.1;
     }
 
     if (particleSystem) {
-      particleSystem.rotation.y += 0.0006;
-      particleSystem.rotation.x -= 0.0003;
+      particleSystem.rotation.y = elapsedTime * 0.02;
+      particleSystem.rotation.x = -elapsedTime * 0.01;
     }
 
     renderer.render(scene, camera);
-
-    // FPS Monitoring & Fallback safeguard
-    frameCount++;
-    const now = performance.now();
-    if (now - lastTime >= 1000) {
-      fps = Math.round((frameCount * 1000) / (now - lastTime));
-      frameCount = 0;
-      lastTime = now;
-
-      if (fps < 30 && renderer.getPixelRatio() > 1) {
-        renderer.setPixelRatio(1);
-      }
-    }
   }
 
   // Initialize WebGL Scene when DOM is ready
